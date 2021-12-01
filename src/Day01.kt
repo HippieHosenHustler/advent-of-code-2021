@@ -1,16 +1,20 @@
 fun main() {
-    fun part1(input: List<String>): Int {
-        val intList = input.map { it.toInt() }
-        val iterator = intList.listIterator()
+
+    fun parseList(input: List<String>): List<Int> {
+        return input.map { it.toInt() }
+    }
+
+    fun getIncreases(input: List<Int>): Int {
+        val iterator = input.listIterator()
         var counter = 0
 
 
         while (iterator.hasNext()) {
-            val next = intList[iterator.nextIndex()]
-            println("next:: $next")
+            val next = input[iterator.nextIndex()]
+//            println("next:: $next")
             if (iterator.hasPrevious()) {
-                val previous = intList[iterator.previousIndex()]
-                println("previous:: $previous")
+                val previous = input[iterator.previousIndex()]
+//                println("previous:: $previous")
                 if (next > previous) {
                     counter++
                 }
@@ -21,8 +25,19 @@ fun main() {
         return counter
     }
 
-    fun part2(input: List<String>): Int {
-        return input.size
+    fun getBlockIncreases(input: List<Int>): Int {
+        val iterator = input.listIterator()
+
+        val blockList = mutableListOf<Int>()
+
+        while (iterator.hasNext() && iterator.nextIndex() <= (input.size - 3)) {
+            val nextIndex = iterator.nextIndex()
+            val block = input[nextIndex] + input[nextIndex + 1] + input[nextIndex + 2]
+            blockList.add(block)
+            iterator.next()
+        }
+
+        return getIncreases(blockList)
     }
 
     // test if implementation meets criteria from the description, like:
@@ -30,6 +45,7 @@ fun main() {
 //    check(part1(testInput) == 1)
 
     val input = readInput("Day01")
-    println(part1(input))
-    println(part2(input))
+    val intList = parseList(input)
+    println(getIncreases(intList))
+    println(getBlockIncreases(intList))
 }
