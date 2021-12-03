@@ -18,10 +18,8 @@ fun main() {
     for (row in initialMatrix) {
         println(row)
     }
-    val commonBitListFlipped: List<Int> = findMostCommonBitInColumnFlipped(initialMatrix, 0)
-    val uncommonBitList: List<Int> = findLeastCommenBitInColumn(commonBitListFlipped)
-    val oxygenArray: List<Int> = getOxygenList(initialMatrix, commonBitListFlipped)
-    val co2Array: List<Int> = getCo2List(initialMatrix, uncommonBitList)
+    val oxygenArray: List<Int> = getOxygenList(initialMatrix)
+    val co2Array: List<Int> = getCo2List(initialMatrix)
     val oxygen: Int = binaryListToDecimal(oxygenArray.reversed())
     val co2: Int = binaryListToDecimal(co2Array.reversed())
     val part2 = oxygen.times(co2)
@@ -44,30 +42,31 @@ fun generateFlippedMatrix(input: List<String>): List<List<Char>> {
 
 }
 
-fun getCo2List(initialMatrix: List<List<Char>>, initialUncommonBitList: List<Int>): List<Int> {
+fun getCo2List(initialMatrix: List<List<Char>>): List<Int> {
     val result = mutableListOf<Int>()
-    var uncommonBitList = mutableListOf<Int>()
-    uncommonBitList.addAll(initialUncommonBitList)
+
 
     var matrix = mutableListOf<MutableList<Char>>()
     for (row in initialMatrix) {
         matrix.add(row.toMutableList())
     }
 
-    for (i in uncommonBitList.indices) {
+    for (i in 0..11) {
+        val commonBit = findMostCommonBitInColumnFlipped(matrix, i, 1)
+        var uncommonBit: Int
+        if (commonBit == 0) uncommonBit = 1
+        else uncommonBit = 0
 
 
         println("column:: $i")
-        println("uncommon bit list:: $uncommonBitList")
-        println("uncommon bit:: ${uncommonBitList[i]}")
+        println("uncommon bit:: ${uncommonBit}")
         for (row in matrix) {
             println(row)
         }
 
 
 
-        matrix = matrix.filter { row -> row[i].digitToInt() == uncommonBitList[i] }.toMutableList()
-        uncommonBitList = findLeastCommenBitInColumn(findMostCommonBitInColumnFlipped(matrix, 0)).toMutableList()
+        matrix = matrix.filter { row -> row[i].digitToInt() == uncommonBit }.toMutableList()
 
         if (matrix.size == 1) {
             for (j in matrix[0]) {
@@ -80,33 +79,29 @@ fun getCo2List(initialMatrix: List<List<Char>>, initialUncommonBitList: List<Int
     throw error("co2 not identified")
 }
 
-fun getOxygenList(initialMatrix: List<List<Char>>, initialCommonBitList: List<Int>): List<Int> {
+fun getOxygenList(initialMatrix: List<List<Char>>): List<Int> {
     val result = mutableListOf<Int>()
-    var commonBitList = mutableListOf<Int>()
-    commonBitList.addAll(initialCommonBitList)
 
     var matrix = mutableListOf<MutableList<Char>>()
     for (col in initialMatrix) {
         matrix.add(col.toMutableList())
     }
 
-    for (i in commonBitList.indices) {
+    for (i in 0..11) {
+        val commonBit = findMostCommonBitInColumnFlipped(matrix, i, 1)
 
 
         println("column:: $i")
-        println("common bit list:: $commonBitList")
-        println("common bit:: ${commonBitList[i]}")
+        println("common bit:: ${commonBit}")
 /*
         for (row in matrix) {
             println(row)
         }
 */
 
-        matrix = matrix.filter { row -> row[i].digitToInt() == commonBitList[i] }.toMutableList()
+        matrix = matrix.filter { row -> row[i].digitToInt() == commonBit }.toMutableList()
 
         println("remaining rows:: ${matrix.size}")
-
-        commonBitList = findMostCommonBitInColumnFlipped(matrix, 1).toMutableList()
 
         if (matrix.size == 1) {
             for (j in matrix[0]) {
@@ -117,17 +112,6 @@ fun getOxygenList(initialMatrix: List<List<Char>>, initialCommonBitList: List<In
 
     }
     throw error("oxygen not identified")
-}
-
-fun findLeastCommenBitInColumn(commonBitList: List<Int>): List<Int> {
-    val result = mutableListOf<Int>()
-
-    for (i in commonBitList) {
-        if (i == 0) result.add(1)
-        else result.add(0)
-    }
-
-    return result
 }
 
 fun binaryListToDecimal(input: List<Int>): Int {
@@ -157,39 +141,25 @@ fun transformToReversedBinaryArray(commonBitList: List<Int>, s: String): List<In
     return result
 }
 
-fun findMostCommonBitInColumnFlipped(initialMatrix: List<List<Char>>, keep: Int): List<Int> {
+fun findMostCommonBitInColumnFlipped(initialMatrix: List<List<Char>>, column: Int, keep: Int): Int {
     val matrix = mutableListOf<MutableList<Char>>()
     for (row in initialMatrix) {
         matrix.add(row.toMutableList())
     }
 
-    val result = mutableListOf<Int>()
-    val zeroes = mutableListOf<Int>()
-    val ones = mutableListOf<Int>()
+    var zeroes = 0
+    var ones = 0
 
     for (row in matrix.indices) {
-        for (col in matrix[row].indices) {
-            if (zeroes.size < col + 1) {
-                zeroes.add(0)
-            }
-            if (ones.size < col + 1) {
-                ones.add(0)
-            }
-
-            if (matrix[row][col] == '0') {
-                zeroes[col]++
-            }
-            else ones[col] ++
-        }
+        if (matrix[row][column] == '0') {
+            zeroes++
+        } else ones++
     }
 
-    for (i in zeroes.indices) {
-        if (zeroes[i] == ones[i]) result.add(keep)
-        else if (zeroes[i] > ones[i]) result.add(0)
-        else result.add(1)
-    }
 
-    return result
+    if (zeroes == ones) return keep
+    else if (zeroes > ones) return 0
+    else return 1
 }
 
 fun findMostCommonBitInColumn(matrix: List<List<Char>>): List<Int> {
